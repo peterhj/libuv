@@ -932,7 +932,7 @@ static void uv__write_callbacks(uv_stream_t* stream) {
 }
 
 
-static void uv__stream_eof(uv_stream_t* stream, const uv_buf_t* buf) {
+static void uv__stream_eof(uv_stream_t* stream, uv_buf_t* buf) {
   stream->flags |= UV_HANDLE_READ_EOF;
   stream->flags &= ~UV_HANDLE_READING;
   uv__io_stop(stream->loop, &stream->io_watcher, POLLIN);
