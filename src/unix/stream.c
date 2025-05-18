@@ -723,11 +723,11 @@ static void uv__write_req_finish(uv_write_t* req) {
    * they should stop writing - which they should if we got an error. Something
    * to revisit in future revisions of the libuv API.
    */
-  if (req->error == 0) {
+  /*if (req->error == 0) {
     if (req->bufs != req->bufsml)
       uv__free(req->bufs);
     req->bufs = NULL;
-  }
+  }*/
 
   /* Add it to the write_completed_queue where it will have its
    * callback called in the near future.
