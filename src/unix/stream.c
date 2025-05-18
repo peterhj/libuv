@@ -917,14 +917,17 @@ static void uv__write_callbacks(uv_stream_t* stream) {
 
     if (req->bufs != NULL) {
       stream->write_queue_size -= uv__write_req_size(req);
+    }
+
+    /* NOTE: call callback _BEFORE_ freeing the request data. */
+    if (req->cb)
+      req->cb(req, req->error);
+
+    if (req->bufs != NULL) {
       if (req->bufs != req->bufsml)
         uv__free(req->bufs);
       req->bufs = NULL;
     }
-
-    /* NOTE: call callback AFTER freeing the request data. */
-    if (req->cb)
-      req->cb(req, req->error);
   }
 }
 

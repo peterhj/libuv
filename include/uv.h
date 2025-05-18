@@ -327,7 +327,7 @@ typedef void (*uv_alloc_cb)(uv_handle_t* handle,
                             uv_buf_t* buf);
 typedef void (*uv_read_cb)(uv_stream_t* stream,
                            ssize_t nread,
-                           const uv_buf_t* buf);
+                           uv_buf_t* buf);
 typedef void (*uv_write_cb)(uv_write_t* req, int status);
 typedef void (*uv_connect_cb)(uv_connect_t* req, int status);
 typedef void (*uv_shutdown_cb)(uv_shutdown_t* req, int status);
