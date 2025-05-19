@@ -724,8 +724,7 @@ static void uv__write_req_finish(uv_write_t* req) {
    * to revisit in future revisions of the libuv API.
    */
   /*if (req->error == 0) {
-    if (req->bufs != req->bufsml)
-      uv__free(req->bufs);
+    uv__free(req->bufs);
     req->bufs = NULL;
   }*/
 
@@ -900,6 +899,7 @@ error:
 
 static void uv__write_callbacks(uv_stream_t* stream) {
   uv_write_t* req;
+  uv_buf_t* req_bufs;
   struct uv__queue* q;
   struct uv__queue pq;
 
@@ -915,7 +915,8 @@ static void uv__write_callbacks(uv_stream_t* stream) {
     uv__queue_remove(q);
     uv__req_unregister(stream->loop);
 
-    if (req->bufs != NULL) {
+    req_bufs = req->bufs;
+    if (req->error != 0 && req_bufs != NULL) {
       stream->write_queue_size -= uv__write_req_size(req);
     }
 
@@ -923,10 +924,8 @@ static void uv__write_callbacks(uv_stream_t* stream) {
     if (req->cb)
       req->cb(req, req->error);
 
-    if (req->bufs != NULL) {
-      if (req->bufs != req->bufsml)
-        uv__free(req->bufs);
-      req->bufs = NULL;
+    if (req_bufs != NULL) {
+      uv__free(req_bufs);
     }
   }
 }
@@ -1362,14 +1361,12 @@ int uv_write2(uv_write_t* req,
   req->send_handle = send_handle;
   uv__queue_init(&req->queue);
 
-  req->bufs = req->bufsml;
-  if (nbufs > ARRAY_SIZE(req->bufsml))
-    req->bufs = uv__malloc(nbufs * sizeof(bufs[0]));
+  req->bufs = uv__malloc(nbufs * sizeof(uv_buf_t));
 
   if (req->bufs == NULL)
     return UV_ENOMEM;
 
-  memcpy(req->bufs, bufs, nbufs * sizeof(bufs[0]));
+  memcpy(req->bufs, bufs, nbufs * sizeof(uv_buf_t));
   req->nbufs = nbufs;
   req->write_index = 0;
   stream->write_queue_size += uv__count_bufs(bufs, nbufs);
